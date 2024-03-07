@@ -63,7 +63,7 @@ class Mpich(AutotoolsPackage, CudaPackage, ROCmPackage):
         "pmi",
         default="default",
         description="""PMI interface.""",
-        values=("default", "pmi1", "pmi2", "pmix", "cray"),
+        values=("default", "pmi1", "pmi2", "pmix", "cray", "slurm"),
         multi=False,
     )
     variant(
@@ -290,6 +290,7 @@ supported, and netmod is ignored if device is ch3:sock.""",
     depends_on("python@3.0:", when="@develop", type="build")
 
     depends_on("cray-pmi", when="pmi=cray")
+    depends_on("slurm", when="pmi=slurm")
 
     conflicts("device=ch4", when="@:3.2")
     conflicts("netmod=ofi", when="@:3.1.4")
@@ -574,6 +575,8 @@ supported, and netmod is ignored if device is ch3:sock.""",
                 config_args.append(
                     "--with-pmi=pmi2 --with-pmi2={0}".format(spec["cray-pmi"].prefix)
                 )
+            elif "pmi=slurm" in spec:
+                config_args.append("--with-pmi={0}".format(spec["slurm"].prefix))
         else:
             if "pmi=pmi1" in spec:
                 config_args.append("--with-pmi=simple")
@@ -583,6 +586,8 @@ supported, and netmod is ignored if device is ch3:sock.""",
                 config_args.append("--with-pmix={0}".format(spec["pmix"].prefix))
             elif "pmi=cray" in spec:
                 config_args.append("--with-pmi=cray")
+            elif "pmi=slurm" in spec:
+                config_args.append("--with-pmi=slurm --with-slurm={0}".format(spec["slurm"].prefix))
 
         if "+cuda" in spec:
             config_args.append("--with-cuda={0}".format(spec["cuda"].prefix))
